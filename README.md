@@ -1,4 +1,4 @@
-# pubmed_to_COA
+# Generate a COI/COA files from a PubMed query
 Write a Collaborating Authors table suitable for USDA/NSF COA/COI files. Note this will not cleanup issues where authors do or don't have middle initials included so the list may have some redundancies. This should be easy to cleanup manually once you have the list.
 
 The prefix "A:" is following the [NSF COA policy](https://nsf.gov/bfa/dias/policy/coa.jsp) - if you need to simplify this in USDA format should be easy enough to do manually.  Arguably it should do better to pull out institutional affiliations to separate department name out, but this seems a bit hard to do well right now so it is just the whole institutional address from the publication.
