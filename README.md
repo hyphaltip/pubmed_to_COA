@@ -1,9 +1,11 @@
-# Generate a Conflict of Interest/Collaborating Authors file from a PubMed query
+# Introduction
+This script supports generate a Conflict of Interest/Collaborating Authors file from a PubMed query.
+
 Write a Collaborating Authors table suitable for USDA/NSF COA/COI files. Note this will not cleanup issues where authors do or don't have middle initials included so the list may have some redundancies. This should be easy to cleanup manually once you have the list.
 
 The prefix "A:" is following the [NSF COA policy](https://nsf.gov/bfa/dias/policy/coa.jsp) - if you need to simplify this in USDA format should be easy enough to do manually.  Arguably it should do better to pull out institutional affiliations to separate department name out, but this seems a bit hard to do well right now so it is just the whole institutional address from the publication.
 
-EXAMPLES
+Examples
 =====
 __*It is best to replace yourname@email.com with your actual email address!*__
 
@@ -17,7 +19,7 @@ Quietly run all and generate report in file `coi.tsv` for the Neuroscientist [Er
 Quietly run all and generate report in file `Blackwell_M_co_authors.tsv` for the Mycologist Meredith Blackwell:
 ```./pubmed_authors_to_COA.py --query 'Blackwell Meredith' -o Blackwell_M_co_authors.tsv -e yourname@email.com```
 
-USAGE
+Usage
 =====
 ```
 usage: pubmed_authors_to_COA.py [-h] [-v] [--debug] -e EMAIL -q QUERY [-m MAX]
@@ -35,10 +37,10 @@ optional arguments:
   -o OUT, --out OUT     Output file name
   ```
   
-  AUTHOR
+  Author
   =====
   [Jason Stajich](http://lab.stajich.org) [@hyphaltip](https://github.com/hyphaltip)
   
-  REQUIREMENTS
+  Requirements
   ============
   * [BioPython](https://biopython.org/)
