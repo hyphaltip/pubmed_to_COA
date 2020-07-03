@@ -24,7 +24,7 @@ Entrez.email = args.email
 handle = Entrez.esearch(db="pubmed",term=args.query,retmax=args.max)
 record = Entrez.read(handle)
 
-splitline=re.compile(r'^\S+\s+\-\s+')
+splitline=re.compile(r'^\S+\s*\-\s+')
 authors = {}
 for publication in record["IdList"]:
     if args.verbose:
@@ -33,6 +33,8 @@ for publication in record["IdList"]:
     author = ""
     inst   = ""
     inAD = False
+    activedate = ""
+    these_authors = []
     for line in recordhandle:
         line = line.strip()
         if line.startswith("FAU"):
@@ -40,20 +42,31 @@ for publication in record["IdList"]:
         elif line.startswith("AD"):
             inst = splitline.sub('',line)
             inAD = True
+            these_authors.append(author)
             if author not in authors:
-                authors[author] = inst
+                authors[author] = { 'inst': inst}
+            else:
+                authors[author]['inst'] = inst
+        elif line.startswith("EDAT"):
+            date = splitline.sub('',line)
+            date = date.split()[0] # take first for date only
+            activedate = date
         elif inAD and not re.match(r'^\S+\s+\-\s+',line):
             if args.debug:
                 print("[DEBUG] address is '%s'"%(line))
-            authors[author] += " " + line
+            authors[author]['inst'] += " " + line
         else:
             if args.debug:
                 print("[DEBUG] inAD=%s skipping line %s"%(inAD,line))
             inAD = False
+    for author in these_authors:
+        authors[author]['active'] = activedate
     if args.debug:
         break
 
 outcsv    = csv.writer(args.out,delimiter="\t")
-outcsv.writerow(["COLLAB","AUTHOR","INSTITUTION"])
+outcsv.writerow(["COLLAB","AUTHOR","INSTITUTION","LASTACTIVE"])
 for author in sorted(authors.keys()):
-    outcsv.writerow(["A:",author,authors[author]])
+    if args.debug:
+        print("Record to print is",author,authors[author])
+    outcsv.writerow(["A:",author,authors[author]['inst'],authors[author]['active']])
