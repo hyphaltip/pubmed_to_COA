@@ -9,15 +9,17 @@ Examples
 =====
 __*It is best to replace yourname@email.com with your actual email address!*__
 
-Run a  search and print out the record IDs for the Biologist [Tyrone B Hayes](http://ib.berkeley.edu/people/faculty/hayest), write to the file `coi.tsv`:
-`./pubmed_authors_to_COA.py -v -q '(Hayes TB OR Hayes Tyrone)' -e yourname@email.com`
+Run a search and print out the record IDs for the US Biologist [Tyrone B Hayes](http://ib.berkeley.edu/people/faculty/hayest), write to the file `coi.tsv`.
+```./pubmed_authors_to_COA.py -v -q '(Hayes TB OR Hayes Tyrone)' -e yourname@email.com```
 
-Quietly run all and generate report in file `coi.tsv` for the Neuroscientist [Erich Jarvis](https://jarvislab.net/):
-
+Generate report of co-authors in publications since 2017 into file `coi.tsv` for the US Neuroscientist [Erich Jarvis](https://jarvislab.net/). No printing of record numbers while running (quiet mode).
 ```./pubmed_authors_to_COA.py -q '(Jarvis Erich or Jarvis ED) AND (("2017/01/01"[Date - Publication] : "3000"[Date - Publication]))' -e yourname@email.com```
 
-Quietly run all and generate report in file `Blackwell_M_co_authors.tsv` for the Mycologist Meredith Blackwell:
+Generate report in file `Blackwell_M_co_authors.tsv` for the US Mycologist [Meredith Blackwell](https://en.wikipedia.org/wiki/Meredith_Blackwell):
 ```./pubmed_authors_to_COA.py --query 'Blackwell Meredith' -o Blackwell_M_co_authors.tsv -e yourname@email.com```
+
+Generate a report for only the first 2 publication records into file `Treseder_authors.tsv` for the US Ecologist [Kathleen Treseder](https://faculty.sites.uci.edu/tresederlab):
+```./pubmed_authors_to_COA.py --query 'Treseder KK' -max 2 -o Treseder_authors.tsv -e yourname@email.com```
 
 Usage
 =====
