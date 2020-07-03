@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # provide a COI list based on publication authors using Pubmed query
+# Author: Jason Stajich (jason.stajich[AT]ucr.edu) / @hyphaltip
 
 import csv, re, sys, os, argparse
 import xml.etree.ElementTree as ET
