@@ -60,7 +60,10 @@ for publication in record["IdList"]:
                 print("[DEBUG] inAD=%s skipping line %s"%(inAD,line))
             inAD = False
     for author in these_authors:
-        authors[author]['active'] = activedate
+        if 'active' not in authors[author]:
+            # don't overwrite, assume records are being returned in most recent to least
+            # could enforce that here by checking date with datecmp. Something for later
+            authors[author]['active'] = activedate
     if args.debug:
         break
 
