@@ -8,7 +8,6 @@ import xml.etree.ElementTree as ET
 from Bio import Entrez
 
 Entrez.email = 'PROVIDE_EMAIL_AT_gmail.com'
-outsamples="coi.tsv"
 
 parser = argparse.ArgumentParser("pubmed_authors_to_COA.py",add_help=True)
 parser.add_argument("-v","--verbose", help="Print out Verbose processing",action='store_true')
