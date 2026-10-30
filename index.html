@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' https://cdn.jsdelivr.net 'wasm-unsafe-eval';
+  connect-src 'self' https://cdn.jsdelivr.net https://eutils.ncbi.nlm.nih.gov https://pypi.org https://files.pythonhosted.org https://api.anthropic.com https://api.openai.com;
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' data:;
+  form-action 'none'; base-uri 'none'; object-src 'none';">
+<title>PubMed to COA</title>
+<style>
+  :root { --fg:#1b1b1b; --bg:#fff; --muted:#5b5b5b; --line:#d9d9d9; --accent:#1f5fa8; --warn:#8a4b00; --ok:#1d6b2a; }
+  @media (prefers-color-scheme: dark) { :root { --fg:#e8e8e8; --bg:#121212; --muted:#a8a8a8; --line:#333; --accent:#7fb0f0; --warn:#f0b36a; --ok:#7fd48f; } }
+  body { margin:0; padding:16px; font:15px/1.45 system-ui, sans-serif; color:var(--fg); background:var(--bg); max-width:1100px; margin-inline:auto; }
+  h1 { font-size:1.5rem; margin:.2em 0; } h2 { font-size:1.1rem; margin:1.2em 0 .4em; }
+  p.lead, .hint { color:var(--muted); } .hint { font-size:.9em; }
+  fieldset { border:1px solid var(--line); border-radius:6px; padding:12px 14px; margin:0 0 14px; }
+  legend { padding:0 6px; font-weight:600; }
+  label { display:block; margin:8px 0 2px; font-weight:600; font-size:.9em; }
+  input[type=text], input[type=email], input[type=password], input[type=number], select { width:100%; box-sizing:border-box; padding:7px 8px; border:1px solid var(--line); border-radius:4px; background:var(--bg); color:var(--fg); font:inherit; }
+  .row { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:0 14px; }
+  button { font:inherit; padding:8px 14px; border-radius:5px; border:1px solid var(--accent); background:var(--accent); color:#fff; cursor:pointer; margin:8px 8px 0 0; }
+  button.secondary { background:transparent; color:var(--accent); }
+  button:disabled { opacity:.5; cursor:default; }
+  #status { white-space:pre-wrap; font-family:ui-monospace, monospace; font-size:.85em; border:1px solid var(--line); border-radius:4px; padding:8px; min-height:2.5em; max-height:12em; overflow:auto; }
+  table { border-collapse:collapse; width:100%; font-size:.85em; margin-top:8px; }
+  th, td { border:1px solid var(--line); padding:4px 6px; text-align:left; vertical-align:top; }
+  th { position:sticky; top:0; background:var(--bg); }
+  .tablewrap { max-height:60vh; overflow:auto; border:1px solid var(--line); }
+  .warn { color:var(--warn); } .ok { color:var(--ok); }
+  details { margin:6px 0; } summary { cursor:pointer; font-weight:600; }
+  footer { margin-top:28px; color:var(--muted); font-size:.85em; }
+</style>
+</head>
+<body>
+<h1>PubMed to COA</h1>
+<p class="lead">Build a co-author list for the NSF <em>Collaborators and Other Affiliations</em> template (Table 4) or the USDA NIFA <em>Conflict of Interest List</em>, from a PubMed query. Everything runs in this browser tab: Python compiled to WebAssembly (Pyodide) parses the PubMed records; nothing is sent to any server except NCBI and, only if you ask for it, the AI provider you choose.</p>
+
+<fieldset>
+  <legend>1. PubMed query</legend>
+  <div class="row">
+    <div><label for="query">PubMed query</label><input id="query" type="text" placeholder="Stajich JE  or  (Hayes TB OR Hayes Tyrone)"></div>
+    <div><label for="email">Your email (required by NCBI)</label><input id="email" type="email" placeholder="you@university.edu"></div>
+  </div>
+  <div class="row">
+    <div><label for="format">Form</label>
+      <select id="format">
+        <option value="nsf">NSF COA template, Table 4 (48 months)</option>
+        <option value="usda">USDA NIFA Conflict of Interest List (3 years)</option>
+      </select></div>
+    <div><label for="datefrom">Earliest entry date (YYYY/MM/DD)</label><input id="datefrom" type="text"></div>
+    <div><label for="max">Max records</label><input id="max" type="number" value="200" min="1" max="2000"></div>
+    <div><label for="piname">Your name (USDA "Name:" line, optional)</label><input id="piname" type="text" placeholder="Last, First M"></div>
+  </div>
+  <button id="run">Fetch from PubMed</button>
+  <span class="hint" id="pyostate">loading Python runtime…</span>
+</fieldset>
+
+<fieldset>
+  <legend>2. Optional AI cleanup (merge name variants, shorten affiliations)</legend>
+  <p class="hint">Your key is sent only to the provider you pick, directly from this tab. It is kept in memory and cleared when you close the tab unless you tick "remember". Use a key with a spending limit that you can revoke. <a href="#safety">More on safe use below.</a></p>
+  <div class="row">
+    <div><label for="provider">Provider</label>
+      <select id="provider">
+        <option value="anthropic">Anthropic (Claude)</option>
+        <option value="openai">OpenAI</option>
+      </select></div>
+    <div><label for="model">Model</label><input id="model" type="text" value="claude-opus-5-5"></div>
+    <div><label for="apikey">API key</label><input id="apikey" type="password" autocomplete="off" placeholder="sk-…"></div>
+  </div>
+  <label style="font-weight:normal"><input id="remember" type="checkbox"> remember key in this browser (localStorage; anyone with access to this browser profile can read it)</label>
+  <button id="cleanup" disabled>Run AI cleanup</button>
+  <button id="forget" class="secondary">Forget key</button>
+</fieldset>
+
+<fieldset>
+  <legend>3. Results</legend>
+  <div id="status">Ready.</div>
+  <div>
+    <button id="dl-tsv" disabled>Download TSV</button>
+    <button id="dl-xlsx" disabled>Download .xlsx</button>
+    <button id="dl-docx" disabled>Download filled USDA .docx</button>
+  </div>
+  <p class="hint" id="pastehint"></p>
+  <div class="tablewrap"><table id="table"></table></div>
+  <details id="mergesbox" hidden><summary>Merges made by AI cleanup</summary><pre id="merges"></pre></details>
+</fieldset>
+
+<h2 id="safety">Safe use of an API key in a browser page</h2>
+<ul>
+  <li>This page is static. There is no backend, so the key never touches a server other than the provider's API. You can verify this in the browser's network panel, and the <code>Content-Security-Policy</code> in the page source limits where the page may connect.</li>
+  <li>Create a separate key for this tool, set a monthly spending limit on it in the provider's console, and revoke it when you are done.</li>
+  <li>Leave "remember key" off on shared computers. With it on, the key is stored in <code>localStorage</code> for this site only.</li>
+  <li>Review the merges list. The model decides which name variants are the same person; the page never deletes a row the model did not account for, but a wrong merge is still possible.</li>
+  <li>The same cleanup is available offline in the command-line version, which uses your existing <code>ANTHROPIC_API_KEY</code>, <code>ant auth login</code> profile, or <code>OPENAI_API_KEY</code>.</li>
+</ul>
+
+<footer>Source and command-line version: <a href="https://github.com/hyphaltip/pubmed_to_COA">github.com/hyphaltip/pubmed_to_COA</a>. Templates: <a href="https://nsf-gov-resources.nsf.gov/files/coa_template.xlsx">NSF COA</a>, <a href="https://www.nifa.usda.gov/sites/default/files/resource/conflict_of_interest.doc">USDA NIFA COI</a>.</footer>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
