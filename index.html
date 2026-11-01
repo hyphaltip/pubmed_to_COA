@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
-  script-src 'self' https://cdn.jsdelivr.net 'wasm-unsafe-eval';
-  connect-src 'self' https://cdn.jsdelivr.net https://eutils.ncbi.nlm.nih.gov https://pypi.org https://files.pythonhosted.org https://api.anthropic.com https://api.openai.com;
+  script-src 'self' https://cdn.jsdelivr.net https://gc.zgo.at 'wasm-unsafe-eval';
+  connect-src 'self' https://cdn.jsdelivr.net https://eutils.ncbi.nlm.nih.gov https://pypi.org https://files.pythonhosted.org https://api.anthropic.com https://api.openai.com https://hyphaltip.goatcounter.com;
   style-src 'self' 'unsafe-inline';
-  img-src 'self' data:;
+  img-src 'self' data: https://hyphaltip.goatcounter.com;
   form-action 'none'; base-uri 'none'; object-src 'none';">
 <title>PubMed to COA</title>
 <style>
@@ -102,5 +102,7 @@
 
 <script src="https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.js"></script>
 <script src="app.js"></script>
+<script data-goatcounter="https://hyphaltip.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
